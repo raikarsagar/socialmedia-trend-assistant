@@ -1,7 +1,7 @@
-import FirecrawlApp from '@mendable/firecrawl-js';
-import dotenv from 'dotenv';
+import FirecrawlApp from "@mendable/firecrawl-js";
+import dotenv from "dotenv";
 // Removed Together import
-import { z } from 'zod';
+import { z } from "zod";
 // Removed zodToJsonSchema import since we no longer enforce JSON output via Together
 
 dotenv.config();
@@ -17,125 +17,137 @@ const StorySchema = z.object({
 });
 
 const StoriesSchema = z.object({
-  stories: z.array(StorySchema).describe(
-    "A list of today's AI or LLM-related stories"
-  ),
+  stories: z
+    .array(StorySchema)
+    .describe("A list of today's AI or LLM-related stories"),
 });
 
-export async function scrapeSources(sources: string[]) {
-  const num_sources = sources.length;
-  console.log(`Scraping ${num_sources} sources...`);
+// Define the TypeScript type for a story using the schema
+type Story = z.infer<typeof StorySchema>;
 
-  let combinedText: { stories: any[] } = { stories: [] };
+/**
+ * Scrape sources using Firecrawl (for non-Twitter URLs) and the Twitter API.
+ * Returns a combined array of story objects.
+ */
+export async function scrapeSources(
+  sources: { identifier: string }[],
+): Promise<Story[]> {
+  // Explicitly type the stories array so it is Story[]
+  const combinedText: { stories: Story[] } = { stories: [] };
 
-  // Configure these if you want to toggle behavior
-  const useTwitter = true;
+  // Configure toggles for scrapers
   const useScrape = true;
+  const useTwitter = true;
+  const tweetStartTime = new Date(
+    Date.now() - 24 * 60 * 60 * 1000,
+  ).toISOString();
 
-  for (const source of sources) {
-    // --- 1) Handle x.com (Twitter) sources ---
+  for (const sourceObj of sources) {
+    const source = sourceObj.identifier;
+
+    // --- 1) Handle Twitter/X sources ---
     if (source.includes("x.com")) {
       if (useTwitter) {
         const usernameMatch = source.match(/x\.com\/([^\/]+)/);
-        if (usernameMatch) {
-          const username = usernameMatch[1];
+        if (!usernameMatch) continue;
+        const username = usernameMatch[1];
 
-          // Build the search query for tweets
-          const query = `from:${username} has:media -is:retweet -is:reply`;
-          const encodedQuery = encodeURIComponent(query);
+        // Construct the query and API URL
+        const query = `from:${username} has:media -is:retweet -is:reply`;
+        const encodedQuery = encodeURIComponent(query);
+        const encodedStartTime = encodeURIComponent(tweetStartTime);
+        const apiUrl = `https://api.x.com/2/tweets/search/recent?query=${encodedQuery}&max_results=10&start_time=${encodedStartTime}`;
 
-          // Get tweets from the last 24 hours
-          const startTime = new Date(
-            Date.now() - 24 * 60 * 60 * 1000
-          ).toISOString();
-          const encodedStartTime = encodeURIComponent(startTime);
-
-          // x.com API URL
-          const apiUrl = `https://api.x.com/2/tweets/search/recent?query=${encodedQuery}&max_results=10&start_time=${encodedStartTime}`;
-
-          // Fetch recent tweets from the Twitter API
+        try {
           const response = await fetch(apiUrl, {
             headers: {
               Authorization: `Bearer ${process.env.X_API_BEARER_TOKEN}`,
             },
           });
-
           if (!response.ok) {
-            throw new Error(`Failed to fetch tweets for ${username}: ${response.statusText}`);
+            throw new Error(
+              `Failed to fetch tweets for ${username}: ${response.statusText}`,
+            );
           }
-
           const tweets = await response.json();
 
           if (tweets.meta?.result_count === 0) {
             console.log(`No tweets found for username ${username}.`);
           } else if (Array.isArray(tweets.data)) {
             console.log(`Tweets found from username ${username}`);
-            const stories = tweets.data.map((tweet: any) => {
-              return {
+            const stories = tweets.data.map(
+              (tweet: any): Story => ({
                 headline: tweet.text,
                 link: `https://x.com/i/status/${tweet.id}`,
-                date_posted: startTime,
-              };
-            });
+                date_posted: tweetStartTime,
+              }),
+            );
             combinedText.stories.push(...stories);
           } else {
-            console.error(
-              "Expected tweets.data to be an array:",
-              tweets.data
-            );
+            console.error("Expected tweets.data to be an array:", tweets.data);
           }
+        } catch (error: any) {
+          console.error(`Error fetching tweets for ${username}:`, error);
         }
       }
     }
-    // --- 2) Handle all other sources with Firecrawl extract ---
+    // --- 2) Handle all other sources with Firecrawl ---
     else {
       if (useScrape) {
-        // Firecrawl will both scrape and extract for you
-        // Provide a prompt that instructs Firecrawl what to extract
         const currentDate = new Date().toLocaleDateString();
         const promptForFirecrawl = `
-        Return only today's AI or LLM related story or post headlines and links in JSON format from the page content. 
-        They must be posted today, ${currentDate}. The format should be:
-        {
-          "stories": [
-            {
-              "headline": "headline1",
-              "link": "link1",
-              "date_posted": "YYYY-MM-DD"
-            },
-            ...
-          ]
-        }
-        If there are no AI or LLM stories from today, return {"stories": []}.
-        
-        The source link is ${source}. 
-        If a story link is not absolute, prepend ${source} to make it absolute. 
-        Return only pure JSON in the specified format (no extra text, no markdown, no \`\`\`). 
+Return only today's AI or LLM related story or post headlines and links in JSON format from the page content. 
+They must be posted today, ${currentDate}. The format should be:
+{
+  "stories": [
+    {
+      "headline": "headline1",
+      "link": "link1",
+      "date_posted": "YYYY-MM-DD"
+    },
+    ...
+  ]
+}
+If there are no AI or LLM stories from today, return {"stories": []}.
+
+The source link is ${source}. 
+If a story link is not absolute, prepend ${source} to make it absolute. 
+Return only pure JSON in the specified format (no extra text, no markdown, no \`\`\`).
         `;
-
-        // Use app.extract(...) directly
-        const scrapeResult = await app.extract(
-          [source],
-          {
+        try {
+          const scrapeResult = await app.extract([source], {
             prompt: promptForFirecrawl,
-            schema: StoriesSchema, // The Zod schema for expected JSON
+            schema: StoriesSchema,
+          });
+          if (!scrapeResult.success) {
+            throw new Error(`Failed to scrape: ${scrapeResult.error}`);
           }
-        );
-
-        if (!scrapeResult.success) {
-          throw new Error(`Failed to scrape: ${scrapeResult.error}`);
+          // Cast the result to our expected type
+          const todayStories = scrapeResult.data as { stories: Story[] };
+          if (!todayStories || !todayStories.stories) {
+            console.error(
+              `Scraped data from ${source} does not have a "stories" key.`,
+              todayStories,
+            );
+            continue;
+          }
+          console.log(
+            `Found ${todayStories.stories.length} stories from ${source}`,
+          );
+          combinedText.stories.push(...todayStories.stories);
+        } catch (error: any) {
+          if (error.statusCode === 429) {
+            console.error(
+              `Rate limit exceeded for ${source}. Skipping this source.`,
+            );
+          } else {
+            console.error(`Error scraping source ${source}:`, error);
+          }
         }
-
-        // The structured data
-        const todayStories = scrapeResult.data;
-        console.log(`Found ${todayStories.stories.length} stories from ${source}`);
-        combinedText.stories.push(...todayStories.stories);
       }
     }
   }
 
-  // Return the combined stories from all sources
-  const rawStories = combinedText.stories;
-  console.log(rawStories);
-  return rawStories;
+  console.log("Combined Stories:", combinedText.stories);
+  return combinedText.stories;
 }
