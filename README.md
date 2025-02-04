@@ -41,21 +41,6 @@ Learn how to set up Trend Finder and start monitoring trends in this video!
 - 💬 Instant Slack or Discord notifications
 - ⏱️ Scheduled monitoring using cron jobs
 
-## Tech Stack
-
-- **Runtime**: Node.js with TypeScript
-- **Framework**: Express.js
-- **AI/ML**: Together AI
-- **Data Sources**:
-  - Twitter/X API
-  - Firecrawl
-- **Notifications**: Slack Webhooks, Discord Webhooks
-- **Scheduling**: node-cron
-- **Development**:
-  - nodemon for hot reloading
-  - TypeScript for type safety
-  - Express async handler for error management
-
 ## Prerequisites
 
 - Node.js (v14 or higher)
@@ -70,8 +55,14 @@ Learn how to set up Trend Finder and start monitoring trends in this video!
 Copy `.env.example` to `.env` and configure the following variables:
 
 ```
-# Required: API key from Together AI for trend analysis (https://www.together.ai/)
+# Optional: API key from Together AI for trend analysis (https://www.together.ai/)
 TOGETHER_API_KEY=your_together_api_key_here
+
+# Optional: API key from DeepSeek for trend analysis (https://deepseek.com/)
+DEEPSEEK_API_KEY=
+
+# Optional: API key from OpenAI for trend analysis (https://openai.com/)
+OPENAI_API_KEY=
 
 # Required if monitoring web pages (https://www.firecrawl.dev/)
 FIRECRAWL_API_KEY=your_firecrawl_api_key_here
