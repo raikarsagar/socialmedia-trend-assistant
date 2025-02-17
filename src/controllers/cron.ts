@@ -6,7 +6,6 @@ import { sendDraft } from "../services/sendDraft";
 export const handleCron = async (): Promise<void> => {
   try {
     const cronSources = await getCronSources();
-
     const rawStories = await scrapeSources(cronSources);
     const rawStoriesString = JSON.stringify(rawStories);
     const draftPost = await generateDraft(rawStoriesString);
