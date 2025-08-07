@@ -1,154 +1,139 @@
-# Trend Finder 🔦
+# TrendFinder
 
-**Stay on top of trending topics on social media — all in one place.**
-
-Trend Finder collects and analyzes posts from key influencers, then sends a Slack or Discord notification when it detects new trends or product launches. This has been a complete game-changer for the Firecrawl marketing team by:
-
-- **Saving time** normally spent manually searching social channels
-- **Keeping you informed** of relevant, real-time conversations
-- **Enabling rapid response** to new opportunities or emerging industry shifts
-
-_Spend less time hunting for trends and more time creating impactful campaigns._
-
-## Watch the Demo & Tutorial video
-
-[![Thumbnail](https://i.ytimg.com/vi/puimQSun92g/hqdefault.jpg)](https://www.youtube.com/watch?v=puimQSun92g)
-
-Learn how to set up Trend Finder and start monitoring trends in this video!
-
-## How it Works
-
-1. **Data Collection** 📥
-   - Monitors selected influencers' posts on Twitter/X using the X API (Warning: the X API free plan is rate limited to only monitor 1 X account every 15 min)
-   - Monitors websites for new releases and news with Firecrawl's /extract
-   - Runs on a scheduled basis using cron jobs
-
-2. **AI Analysis** 🧠
-   - Processes collected content through Together AI
-   - Identifies emerging trends, releases, and news.
-   - Analyzes sentiment and relevance
-
-3. **Notification System** 📢
-   - When significant trends are detected, sends Slack or Discord notifications based on cron job setup
-   - Provides context about the trend and its sources
-   - Enables quick response to emerging opportunities
+A web application that generates and displays AI & LLM trends from various sources.
 
 ## Features
 
-- 🤖 AI-powered trend analysis using Together AI
-- 📱 Social media monitoring (Twitter/X integration)
-- 🔍 Website monitoring with Firecrawl
-- 💬 Instant Slack or Discord notifications
-- ⏱️ Scheduled monitoring using cron jobs
-
-## Prerequisites
-
-- Node.js (v14 or higher)
-- npm or yarn
-- Docker
-- Docker Compose
-- Slack workspace with webhook permissions
-- API keys for required services
-
-## Environment Variables
-
-Copy `.env.example` to `.env` and configure the following variables:
-
-```
-# Optional: API key from Together AI for trend analysis (https://www.together.ai/)
-TOGETHER_API_KEY=your_together_api_key_here
-
-# Optional: API key from DeepSeek for trend analysis (https://deepseek.com/)
-DEEPSEEK_API_KEY=
-
-# Optional: API key from OpenAI for trend analysis (https://openai.com/)
-OPENAI_API_KEY=
-
-# Required if monitoring web pages (https://www.firecrawl.dev/)
-FIRECRAWL_API_KEY=your_firecrawl_api_key_here
-
-# Required if monitoring Twitter/X trends (https://developer.x.com/)
-X_API_BEARER_TOKEN=your_twitter_api_bearer_token_here
-
-# Notification driver. Supported drivers: "slack", "discord"
-NOTIFICATION_DRIVER=discord
-
-# Required (if NOTIFICATION_DRIVER is "slack"): Incoming Webhook URL from Slack for notifications
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
-
-# Required (if NOTIFICATION_DRIVER is "discord"): Incoming Webhook URL from Discord for notifications
-DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/WEBHOOK/URL
-```
+- **Web Dashboard**: Beautiful UI to view and manage trend analyses
+- **Trend Generation**: Automatically scrapes sources and generates trend summaries
+- **Real-time Updates**: Generate new trends on-demand through the web interface
+- **Modern Design**: Responsive, modern UI with smooth animations
 
 ## Getting Started
 
-1. **Clone the repository:**
-   ```bash
-   git clone [repository-url]
-   cd trend-finder
-   ```
+### Prerequisites
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+- Node.js (v14 or higher)
+- npm or yarn
+- Required API keys (see Environment Variables section)
 
-3. **Configure environment variables:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
+### Installation
 
-4. **Run the application:**
-   ```bash
-   # Development mode with hot reloading
-   npm run start
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd trendFinder
+```
 
-   # Build for production
-   npm run build
-   ```
+2. Install dependencies:
+```bash
+npm install
+```
 
-## Using Docker
+3. Set up environment variables (see Environment Variables section)
 
-1. **Build the Docker image:**
-   ```bash
-   docker build -t trend-finder .
-   ```
+4. Start the development server:
+```bash
+npm start
+```
 
-2. **Run the Docker container:**
-   ```bash
-   docker run -d -p 3000:3000 --env-file .env trend-finder
-   ```
+5. Open your browser and navigate to `http://localhost:3000`
 
-## Using Docker Compose
+## Environment Variables
 
-1. **Start the application with Docker Compose:**
-   ```bash
-   docker-compose up --build -d
-   ```
+Create a `.env` file in the root directory with the following variables:
 
-2. **Stop the application with Docker Compose:**
-   ```bash
-   docker-compose down
-   ```
+```env
+# OpenAI API Key (required for trend generation)
+OPENAI_API_KEY=your_openai_api_key_here
 
-## Project Structure
+# Firecrawl API Key (optional, for web scraping)
+FIRECRAWL_API_KEY=your_firecrawl_api_key_here
+
+# X (Twitter) API Bearer Token (optional, for Twitter scraping)
+X_API_BEARER_TOKEN=your_x_api_bearer_token_here
+
+# Server port (optional, defaults to 3000)
+PORT=3000
+```
+
+## Usage
+
+### Web Interface
+
+1. **View Trends**: The dashboard displays all generated trends in chronological order
+2. **Generate New Trend**: Click the "Generate New Trend" button to create a new analysis
+3. **Refresh**: Use the "Refresh Trends" button to reload the trends list
+
+### API Endpoints
+
+- `GET /api/trends` - Get all stored trends
+- `POST /api/generate-trend` - Generate a new trend analysis
+- `POST /api/trends` - Add a custom trend (requires content in request body)
+
+### Programmatic Usage
+
+You can also use the API programmatically:
+
+```bash
+# Generate a new trend
+curl -X POST http://localhost:3000/api/generate-trend
+
+# Get all trends
+curl http://localhost:3000/api/trends
+
+# Add a custom trend
+curl -X POST http://localhost:3000/api/trends \
+  -H "Content-Type: application/json" \
+  -d '{"content": "Your custom trend content here"}'
+```
+
+## Development
+
+### Available Scripts
+
+- `npm start` - Start the development server with hot reload
+- `npm run build` - Build the TypeScript code
+- `npm test` - Run tests (not implemented yet)
+
+### Project Structure
 
 ```
-trend-finder/
+trendFinder/
 ├── src/
-│   ├── controllers/    # Request handlers
-│   ├── services/       # Business logic
-│   └── index.ts        # Application entry point
-├── .env.example        # Environment variables template
-├── package.json        # Dependencies and scripts
-└── tsconfig.json       # TypeScript configuration
+│   ├── controllers/
+│   │   └── cron.ts          # Cron job controller
+│   ├── services/
+│   │   ├── generateDraft.ts  # Trend generation logic
+│   │   ├── getCronSources.ts # Source configuration
+│   │   ├── scrapeSources.ts  # Web scraping logic
+│   │   └── sendDraft.ts      # Webhook sending (legacy)
+│   └── index.ts              # Express server setup
+├── public/
+│   └── index.html            # Web UI
+├── package.json
+└── README.md
 ```
+
+## Data Sources
+
+The application scrapes trends from various sources including:
+
+- OpenAI News
+- Anthropic News
+- Hacker News
+- Reuters Technology
+- Simon Willison's Blog
+- AI News Newsletter
+- X (Twitter) accounts (when API key is provided)
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+ISC License - see LICENSE file for details.

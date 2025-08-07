@@ -7,14 +7,16 @@ dotenv.config();
  * Generate a post draft based on scraped raw stories.
  * If no items are found, a fallback message is returned.
  */
-export async function generateDraft(rawStories: string) {
+export async function generateDraft(rawStories: string, keywords?: string) {
   console.log(
     `Generating a post draft with raw stories (${rawStories.length} characters)...`,
   );
 
   try {
     const currentDate = new Date().toLocaleDateString();
-    const header = `🚀 AI and LLM Trends on X for ${currentDate}\n\n`;
+    const header = keywords 
+      ? `🔍 Search Results for "${keywords}" - ${currentDate}\n\n`
+      : `🚀 Indian News Trends for ${currentDate}\n\n`;
 
     // Instantiate the OpenAI client using your OPENAI_API_KEY
     const openai = new OpenAI({
@@ -27,8 +29,10 @@ export async function generateDraft(rawStories: string) {
         role: "system",
         content:
           "You are a helpful assistant that creates a concise, bullet-pointed draft post based on input stories and tweets. " +
+          "Focus on the most important and recent news items. " +
           "Return strictly valid JSON that has a key 'interestingTweetsOrStories' containing an array of items. " +
-          "Each item should have a 'description' and a 'story_or_tweet_link' key.",
+          "Each item should have a 'description' and a 'story_or_tweet_link' key. " +
+          "Limit to 5-8 most relevant items.",
       },
       {
         role: "user",

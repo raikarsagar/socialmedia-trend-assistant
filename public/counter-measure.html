@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prasthuthi Anveshana - Analyze Data</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            font-size: 1.7rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-result {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .search-result .content-text {
+            font-size: 1.2rem;
+            line-height: 1.7;
+        }
+
+        .counter-measure {
+            background: #e8f5e8;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #28a745;
+            position: relative;
+        }
+
+        .counter-measure .content-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .clipboard-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .clipboard-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .clipboard-btn:active {
+            transform: translateY(0);
+        }
+
+        .clipboard-btn.copied {
+            background: #6c757d;
+        }
+
+        .content-text {
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .loading h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .error h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Prasthuthi Anveshana - Analyze Data</h1>
+            <p>Summary</p>
+        </div>
+
+        <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+
+        <div id="content">
+            <div class="loading">
+                <h3>Loading counter-measure...</h3>
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let counterMeasureData = null;
+
+        async function loadCounterMeasure() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pathParts = window.location.pathname.split('/');
+            const id = pathParts[pathParts.length - 1];
+
+            try {
+                const response = await fetch(`/api/counter-measure/${id}`);
+                
+                if (!response.ok) {
+                    throw new Error('Counter-measure not found');
+                }
+
+                counterMeasureData = await response.json();
+                displayCounterMeasure();
+            } catch (error) {
+                console.error('Error loading counter-measure:', error);
+                showError('Failed to load counter-measure');
+            }
+        }
+
+        function displayCounterMeasure() {
+            const contentDiv = document.getElementById('content');
+            
+            // Debug: Log the entire counterMeasureData object
+            console.log('Full counterMeasureData:', counterMeasureData);
+            console.log('Keywords:', counterMeasureData.keywords);
+            console.log('Keywords type:', typeof counterMeasureData.keywords);
+            
+            // Get the search phrase/keywords, fallback to "Search Results" if not available
+            const searchPhrase = counterMeasureData.keywords || "Search Results";
+            
+            contentDiv.innerHTML = `
+                <div class="content-section">
+                    <div class="section-header">
+                        🔍 ${searchPhrase}
+                    </div>
+                    <div class="search-result">
+                        <div class="content-text">${counterMeasureData.searchResult}</div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="section-header">
+                        Action / Narrative Analyzer
+                    </div>
+                    <div class="counter-measure">
+                        <div class="content-text" id="counterMeasureText">${counterMeasureData.counterMeasure}</div>
+                        <button class="clipboard-btn" onclick="copyToClipboard()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+                                <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-.5-.5h-2a.5.5 0 0 0-.5.5v1H6.5a.5.5 0 0 0-.5.5v1H4a1 1 0 0 1-1-1V1.5a1 1 0 0 1 1-1h1Z"/>
+                                <path d="M4.5 2A1.5 1.5 0 0 0 3 3.5V4h10V3.5A1.5 1.5 0 0 0 12.5 2H12v1H3.5A1.5 1.5 0 0 0 2 4.5V14a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V4.5a1.5 1.5 0 0 0-1.5-1.5H12V3.5A1.5 1.5 0 0 0 10.5 2H4.5Z"/>
+                            </svg>
+                            Copy
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = `
+                <div class="error">
+                    <h3>❌ Error</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function goBack() {
+            // Try to restore previous state
+            const savedState = sessionStorage.getItem('searchPageState');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                // Store the state for the main page to restore
+                sessionStorage.setItem('restoreState', savedState);
+            }
+            
+            window.location.href = '/';
+        }
+
+        function copyToClipboard() {
+            const textElement = document.getElementById('counterMeasureText');
+            const text = textElement.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const clipboardBtn = document.querySelector('.clipboard-btn');
+                const originalContent = clipboardBtn.innerHTML;
+                
+                clipboardBtn.classList.add('copied');
+                clipboardBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+                        <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                    </svg>
+                    Copied!
+                `;
+                
+                setTimeout(() => {
+                    clipboardBtn.classList.remove('copied');
+                    clipboardBtn.innerHTML = originalContent;
+                }, 2000); // Reset after 2 seconds
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert('Failed to copy text. Please copy manually.');
+            });
+        }
+
+        // Load counter-measure on page load
+        loadCounterMeasure();
+    </script>
+</body>
+</html> 

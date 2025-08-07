@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prasthuthi Anveshana</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .search-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .search-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        .search-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-input input::placeholder {
+            color: #999;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .trends-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .trend-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            max-height: 200px;
+            overflow: hidden;
+        }
+
+        .trend-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .trend-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
+        }
+
+        .trend-date {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+
+        .trend-time {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .trend-keywords {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .trend-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 0;
+        }
+
+        .trend-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .item-description {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 6px;
+            line-height: 1.4;
+            font-size: 0.95rem;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .item-link {
+            font-size: 0.8rem;
+            margin-top: auto;
+        }
+
+        .item-link a {
+            color: #667eea;
+            text-decoration: none;
+            word-break: break-all;
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .item-link a:hover {
+            text-decoration: underline;
+        }
+
+        .trend-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
+            font-size: 0.8rem;
+        }
+
+        .counter-measure-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .counter-measure-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+        }
+
+        .counter-measure-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .trend-content {
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-size: 1rem;
+        }
+
+        .trend-item {
+            margin-bottom: 10px;
+        }
+
+        .item-description {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .item-link {
+            font-size: 0.9rem;
+        }
+
+        .item-link a {
+            color: #667eea;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .item-link a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            opacity: 0.8;
+        }
+
+        .status {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .example-keywords {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .example-keywords span {
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-right: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .example-keywords span:hover {
+            background: #e0e0e0;
+        }
+
+        .log-container {
+            background: rgba(0,0,0,0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .log-container.show {
+            display: block;
+        }
+
+        .log-header {
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-content {
+            white-space: pre-wrap;
+        }
+
+        .log-close {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .log-close:hover {
+            background: #cc0000;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .trend-card {
+                padding: 15px;
+                max-height: 180px;
+            }
+
+            .trend-header {
+                font-size: 0.8rem;
+            }
+
+            .item-description {
+                font-size: 0.9rem;
+                -webkit-line-clamp: 3;
+            }
+
+            .counter-measure-btn {
+                padding: 5px 10px;
+                font-size: 0.75rem;
+            }
+
+            .search-input {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Prasthuthi Anveshana</h1>
+            <p>Dashboard</p>
+        </div>
+
+        <div class="controls">
+            <div class="search-section">
+                <h3>🔍 Search Trends</h3>
+                <div class="search-input">
+                    <input type="text" id="keywordInput" placeholder="Enter keywords (e.g., Karnataka, Bangalore, politics, etc.)" />
+                    <button class="btn" onclick="searchTrends()" id="searchBtn">Search Trends</button>
+                </div>
+                <div class="example-keywords">
+                    Try: <span onclick="setKeyword('Karnataka')">Karnataka</span>
+                    <span onclick="setKeyword('Bangalore')">Bangalore</span>
+                    <span onclick="setKeyword('politics')">politics</span>
+                    <span onclick="setKeyword('election')">election</span>
+                    <span onclick="setKeyword('development')">development</span>
+                </div>
+            </div>
+
+            <div class="status" id="status"></div>
+        </div>
+
+        <div class="log-container" id="logContainer">
+            <div class="log-header">
+                <span>🔍 Search Progress Log</span>
+                <button class="log-close" onclick="hideLog()">✕</button>
+            </div>
+            <div class="log-content" id="logContent"></div>
+        </div>
+
+        <div class="trends-container" id="trendsContainer">
+            <div class="loading">Loading trends...</div>
+        </div>
+    </div>
+
+    <script>
+        let isLoading = false;
+        let logContent = '';
+        let currentKeywords = ''; // To store keywords for back navigation
+
+        function setKeyword(keyword) {
+            document.getElementById('keywordInput').value = keyword;
+        }
+
+        function showLog() {
+            document.getElementById('logContainer').classList.add('show');
+        }
+
+        function hideLog() {
+            document.getElementById('logContainer').classList.remove('show');
+        }
+
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logContent += `[${timestamp}] ${message}\n`;
+            document.getElementById('logContent').textContent = logContent;
+            
+            // Auto-scroll to bottom
+            const logContainer = document.getElementById('logContainer');
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLog() {
+            logContent = '';
+            document.getElementById('logContent').textContent = '';
+        }
+
+        async function fetchTrends() {
+            try {
+                const response = await fetch('/api/trends');
+                const trends = await response.json();
+                displayTrends(trends);
+            } catch (error) {
+                console.error('Error fetching trends:', error);
+                showStatus('Error loading trends', 'error');
+            }
+        }
+
+        function displayTrends(trends) {
+            const container = document.getElementById('trendsContainer');
+            
+            if (trends.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No trends yet</h3>
+                        <p>Search for specific keywords or generate general trends to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = trends.map(trend => {
+                // Split the content into individual items (each bullet point)
+                const items = trend.content.split('\n\n').filter(item => item.trim().startsWith('•'));
+                
+                return items.map((item, index) => {
+                    const description = item.split('\n')[0].replace('• ', '');
+                    const link = item.split('\n')[1]?.trim() || '';
+                    
+                    return `
+                        <div class="trend-card">
+                            <div class="trend-header">
+                                <div class="trend-date">${trend.date}</div>
+                                <div style="display: flex; align-items: center;">
+                                    <div class="trend-time">${new Date(trend.timestamp).toLocaleTimeString()}</div>
+                                    ${trend.keywords ? `<div class="trend-keywords">🔍 ${trend.keywords}</div>` : ''}
+                                </div>
+                            </div>
+                            <div class="trend-content">
+                                <div class="trend-item">
+                                    <div class="item-description">${description}</div>
+                                    ${link ? `<div class="item-link"><a href="${link}" target="_blank" title="${link}">${link}</a></div>` : ''}
+                                </div>
+                            </div>
+                            <div class="trend-actions">
+                                <span style="color: #666;">${index + 1}/${items.length}</span>
+                                <button class="counter-measure-btn" onclick="applyCounterMeasure('${description.replace(/'/g, "\\'")}')">
+                                    Analyze
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }).join('');
+        }
+
+        async function searchTrends() {
+            if (isLoading) return;
+            
+            const keywordInput = document.getElementById('keywordInput');
+            currentKeywords = keywordInput.value.trim();
+            
+            if (!currentKeywords) {
+                showStatus('Please enter keywords to search', 'error');
+                return;
+            }
+            
+            isLoading = true;
+            const btn = document.getElementById('searchBtn');
+            btn.disabled = true;
+            btn.textContent = 'Searching...';
+            
+            // Show log and start logging
+            showLog();
+            clearLog();
+            addLog(`Starting search for: "${currentKeywords}"`);
+            addLog('Initializing search across multiple sources...');
+            
+            showStatus(`Searching for trends related to "${currentKeywords}"...`, 'info');
+
+            try {
+                // Simulate realistic search progress based on actual steps
+                setTimeout(() => addLog('🔍 Checking web sources: The Hindu, Deccan Herald, News18...'), 1000);
+                setTimeout(() => addLog('📰 Searching for keyword variations...'), 3000);
+                setTimeout(() => addLog('🐦 Querying Twitter/X for related content...'), 5000);
+                setTimeout(() => addLog('⚙️ Processing and analyzing results...'), 7000);
+
+                const response = await fetch('/api/search-trends', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ keywords: currentKeywords })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    addLog('✅ Search completed successfully!');
+                    addLog(`📊 Found ${result.content.split('•').length - 1} relevant items`);
+                    
+                    setTimeout(() => {
+                        hideLog();
+                        showStatus(`Found trends for "${currentKeywords}"!`, 'success');
+                        fetchTrends();
+                    }, 2000);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to search trends');
+                }
+            } catch (error) {
+                console.error('Error searching trends:', error);
+                addLog(`❌ Error: ${error.message}`);
+                showStatus(`Error searching trends: ${error.message}`, 'error');
+            } finally {
+                isLoading = false;
+                btn.disabled = false;
+                btn.textContent = 'Search Trends';
+            }
+        }
+
+        async function applyCounterMeasure(searchResult) {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            
+            // Debug: Log the current keywords
+            console.log('Current keywords when applying counter-measure:', currentKeywords);
+            console.log('Search result:', searchResult);
+            
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> Composing...';
+            
+            try {
+                const requestBody = { 
+                    searchResult,
+                    keywords: currentKeywords || ''
+                };
+                console.log('Sending request body:', requestBody);
+                
+                const response = await fetch('/api/generate-counter-measure', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Store current page state for back navigation
+                    sessionStorage.setItem('searchPageState', JSON.stringify({
+                        trends: await fetch('/api/trends').then(r => r.json()),
+                        keywords: currentKeywords
+                    }));
+                    
+                    // Navigate to counter-measure page
+                    window.location.href = `/counter-measure/${result.id}`;
+                } else {
+                    throw new Error('Failed to generate counter-measure');
+                }
+            } catch (error) {
+                console.error('Error generating counter-measure:', error);
+                showStatus('Error generating counter-measure', 'error');
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.style.background = type === 'error' ? 'rgba(255,0,0,0.2)' : 
+                                   type === 'success' ? 'rgba(0,255,0,0.2)' : 
+                                   'rgba(255,255,255,0.1)';
+            
+            setTimeout(() => {
+                status.textContent = '';
+                status.style.background = 'rgba(255,255,255,0.1)';
+            }, 3000);
+        }
+
+        // Handle Enter key in search input
+        document.getElementById('keywordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchTrends();
+            }
+        });
+
+        // Load trends on page load
+        fetchTrends();
+
+        // Check if we need to restore state from counter-measure page
+        window.addEventListener('load', function() {
+            const restoreState = sessionStorage.getItem('restoreState');
+            if (restoreState) {
+                const state = JSON.parse(restoreState);
+                if (state.keywords) {
+                    document.getElementById('keywordInput').value = state.keywords;
+                    currentKeywords = state.keywords;
+                }
+                // Clear the restore state
+                sessionStorage.removeItem('restoreState');
+            }
+        });
+    </script>
+</body>
+</html> 
